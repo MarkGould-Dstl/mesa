@@ -1,7 +1,12 @@
-import sys
+import asyncio
 import os
-import click
+import sys
 from subprocess import call
+
+import click
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 PROJECT_PATH = click.Path(
     exists=True, file_okay=False, dir_okay=True, resolve_path=True

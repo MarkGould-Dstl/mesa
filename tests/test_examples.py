@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import os.path
 import unittest
@@ -41,11 +42,11 @@ class TestExamples(unittest.TestCase):
         for example in os.listdir(self.EXAMPLES):
             if not os.path.isdir(os.path.join(self.EXAMPLES, example)):
                 continue
-            if hasattr(self, f"test_{example.replace('-', '_')}"):
+            if hasattr(self, "test_{}".format(example.replace("-", "_"))):
                 # non-standard example; tested below
                 continue
 
-            print(f"testing example {example!r}")
+            print("testing example {!r}".format(example))
             with self.active_example_dir(example):
                 try:
                     # model.py at the top level
@@ -54,9 +55,11 @@ class TestExamples(unittest.TestCase):
                     server.server.render_model()
                 except ImportError:
                     # <example>/model.py
-                    mod = importlib.import_module(f"{example.replace('-', '_')}.model")
+                    mod = importlib.import_module(
+                        "{}.model".format(example.replace("-", "_"))
+                    )
                     server = importlib.import_module(
-                        f"{example.replace('-', '_')}.server"
+                        "{}.server".format(example.replace("-", "_"))
                     )
                     server.server.render_model()
                 Model = getattr(mod, classcase(example))

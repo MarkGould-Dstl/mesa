@@ -75,7 +75,7 @@ class TestSpaceToroidal(unittest.TestCase):
 
         pos_6 = (-30, -29)
         pos_7 = (21, -5)
-        assert self.space.get_distance(pos_6, pos_7) == np.sqrt(49**2 + 24**2)
+        assert self.space.get_distance(pos_6, pos_7) == np.sqrt(49 ** 2 + 24 ** 2)
 
     def test_heading(self):
         pos_1 = (-30, -30)
@@ -121,7 +121,7 @@ class TestSpaceToroidal(unittest.TestCase):
 
 class TestSpaceNonToroidal(unittest.TestCase):
     """
-    Testing a toroidal continuous space.
+    Testing a non-toroidal continuous space.
     """
 
     def setUp(self):
@@ -196,6 +196,26 @@ class TestSpaceNonToroidal(unittest.TestCase):
             assert self.space.out_of_bounds(pos)
             with self.assertRaises(Exception):
                 self.space.move_agent(a, pos)
+
+    def test_invalid_space_setup(self):
+        """
+        Test the creation of an invalid test space.
+        """
+        with self.assertRaises(ValueError) as e:
+            self.space = ContinuousSpace(70, 20, False, 80, -30)
+        self.assertEqual(
+            "When creating a space, the minimum x value (80) cannot be"
+            + "greater than the maximum x value (70)",
+            str(e.exception),
+        )
+
+        with self.assertRaises(ValueError) as e:
+            self.space = ContinuousSpace(70, 20, False, -30, 30)
+        self.assertEqual(
+            "When creating a space, the minimum y value (30) cannot be"
+            + "greater than the maximum y value (20)",
+            str(e.exception),
+        )
 
 
 class TestSpaceAgentMapping(unittest.TestCase):

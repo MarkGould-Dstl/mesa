@@ -6,7 +6,7 @@ Module for drawing live-updating bar charts using d3.js
 
 """
 import json
-from mesa.visualization.ModularVisualization import VisualizationElement, D3_JS_FILE
+from mesa.visualization.ModularVisualization import VisualizationElement
 
 
 class BarChartModule(VisualizationElement):
@@ -14,12 +14,12 @@ class BarChartModule(VisualizationElement):
         with a bar chart.
 
     Attributes:
-        scope: whether to visualize agent-level or model-level fields
+        scope: wheter to visualize agent-level or model-level fields
         fields: A List of Dictionaries containing information about each field to be charted,
                 including the name of the datacollector field and the desired color of the
-                corresponding bar.
+                cooresponding bar.
                 Ex: [{"Label":"<your field name>", "Color":"<your desired color in hex>"}]
-        sorting: Whether to sort ascending, descending, or neither when charting agent fields
+        sorting: Wheter to sort ascending, descending, or neither when charting agent fields
         sort_by: The agent field to sort by
         canvas_height, canvas_width: The width and height to draw the chart on the page, in pixels.
                                     Default to 800 x 400
@@ -27,7 +27,7 @@ class BarChartModule(VisualizationElement):
 
     """
 
-    package_includes = [D3_JS_FILE, "BarChartModule.js"]
+    package_includes = ["d3.min.js", "BarChartModule.js"]
 
     def __init__(
         self,
@@ -47,7 +47,7 @@ class BarChartModule(VisualizationElement):
                    fields.
             fields: A List of Dictionaries containing information about each field to be charted,
                     including the name of the datacollector field and the desired color of the
-                    corresponding bar.
+                    cooresponding bar.
                     Ex: [{"Label":"<your field name>", "Color":"<your desired color in hex>"}]
             sorting: "ascending", "descending", or "none"
             sort_by: The agent field to sort by

@@ -14,7 +14,7 @@ def get_distance(pos_1, pos_2):
     x2, y2 = pos_2
     dx = x1 - x2
     dy = y1 - y2
-    return math.sqrt(dx**2 + dy**2)
+    return math.sqrt(dx ** 2 + dy ** 2)
 
 
 class SsAgent(Agent):
@@ -47,12 +47,12 @@ class SsAgent(Agent):
         ]
         neighbors.append(self.pos)
         # Look for location with the most sugar
-        max_sugar = max(self.get_sugar(pos).amount for pos in neighbors)
+        max_sugar = max([self.get_sugar(pos).amount for pos in neighbors])
         candidates = [
             pos for pos in neighbors if self.get_sugar(pos).amount == max_sugar
         ]
         # Narrow down to the nearest ones
-        min_dist = min(get_distance(self.pos, pos) for pos in candidates)
+        min_dist = min([get_distance(self.pos, pos) for pos in candidates])
         final_candidates = [
             pos for pos in candidates if get_distance(self.pos, pos) == min_dist
         ]
@@ -68,7 +68,7 @@ class SsAgent(Agent):
         self.move()
         self.eat()
         if self.sugar <= 0:
-            self.model.grid.remove_agent(self)
+            self.model.grid._remove_agent(self.pos, self)
             self.model.schedule.remove(self)
 
 

@@ -9,20 +9,5 @@ If you have `Multiple` type agents and one of them has time attribute you can st
 
 .. code:: python
 
-  if self.model.schedule.time in self.discrete_time:
-      self.model.space.move_agent(self, new_pos)
-
-
-Using ```numpy.random```
--------------
-
-Sometimes you need to use ``numpy``'s ``random`` library, for example to get a Poisson distribution. 
-
-.. code:: python
-
-  class MyModel(Model):
-      def __init__(self, ...):
-          super().__init__()
-          self.random = np.random.default_rng(seed)
-
-And just use `numpy`'s random as usual, e.g. ``self.random.poisson()``.
+if self.model.schedule.time in self.discrete_time:
+  self.model.space.move_agent(self, new_pos)

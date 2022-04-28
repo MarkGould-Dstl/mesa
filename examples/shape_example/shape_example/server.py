@@ -11,7 +11,7 @@ def agent_draw(agent):
         # aesthetics
         pass
     elif isinstance(agent, Walker):
-        print(f"Uid: {agent.unique_id}, Heading: {agent.heading}")
+        print("Uid: {0}, Heading: {1}".format(agent.unique_id, agent.heading))
         portrayal = {
             "Shape": "arrowHead",
             "Filled": "true",

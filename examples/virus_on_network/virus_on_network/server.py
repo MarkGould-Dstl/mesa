@@ -34,7 +34,9 @@ def network_portrayal(G):
         {
             "size": 6,
             "color": node_color(agents[0]),
-            "tooltip": f"id: {agents[0].unique_id}<br>state: {agents[0].state.name}",
+            "tooltip": "id: {}<br>state: {}".format(
+                agents[0].unique_id, agents[0].state.name
+            ),
         }
         for (_, agents) in G.nodes.data("agent")
     ]
@@ -52,7 +54,7 @@ def network_portrayal(G):
     return portrayal
 
 
-network = NetworkModule(network_portrayal, 500, 500)
+network = NetworkModule(network_portrayal, 500, 500, library="d3")
 chart = ChartModule(
     [
         {"Label": "Infected", "Color": "#FF0000"},
@@ -65,7 +67,7 @@ chart = ChartModule(
 class MyTextElement(TextElement):
     def render(self, model):
         ratio = model.resistant_susceptible_ratio()
-        ratio_text = "&infin;" if ratio is math.inf else f"{ratio:.2f}"
+        ratio_text = "&infin;" if ratio is math.inf else "{0:.2f}".format(ratio)
         infected_text = str(number_infected(model))
 
         return "Resistant/Susceptible Ratio: {}<br>Infected Remaining: {}".format(

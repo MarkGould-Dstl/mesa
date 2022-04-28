@@ -13,8 +13,8 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from wolf_sheep.scheduler import RandomActivationByTypeFiltered
 from wolf_sheep.agents import Sheep, Wolf, GrassPatch
+from wolf_sheep.schedule import RandomActivationByBreed
 
 
 class WolfSheep(Model):
@@ -45,8 +45,8 @@ class WolfSheep(Model):
 
     def __init__(
         self,
-        width=20,
         height=20,
+        width=20,
         initial_sheep=100,
         initial_wolves=50,
         sheep_reproduce=0.04,
@@ -72,8 +72,8 @@ class WolfSheep(Model):
         """
         super().__init__()
         # Set parameters
-        self.width = width
         self.height = height
+        self.width = width
         self.initial_sheep = initial_sheep
         self.initial_wolves = initial_wolves
         self.sheep_reproduce = sheep_reproduce
@@ -83,15 +83,12 @@ class WolfSheep(Model):
         self.grass_regrowth_time = grass_regrowth_time
         self.sheep_gain_from_food = sheep_gain_from_food
 
-        self.schedule = RandomActivationByTypeFiltered(self)
-        self.grid = MultiGrid(self.width, self.height, torus=True)
+        self.schedule = RandomActivationByBreed(self)
+        self.grid = MultiGrid(self.height, self.width, torus=True)
         self.datacollector = DataCollector(
             {
-                "Wolves": lambda m: m.schedule.get_type_count(Wolf),
-                "Sheep": lambda m: m.schedule.get_type_count(Sheep),
-                "Grass": lambda m: m.schedule.get_type_count(
-                    GrassPatch, lambda x: x.fully_grown
-                ),
+                "Wolves": lambda m: m.schedule.get_breed_count(Wolf),
+                "Sheep": lambda m: m.schedule.get_breed_count(Sheep),
             }
         )
 
@@ -139,30 +136,21 @@ class WolfSheep(Model):
             print(
                 [
                     self.schedule.time,
-                    self.schedule.get_type_count(Wolf),
-                    self.schedule.get_type_count(Sheep),
-                    self.schedule.get_type_count(GrassPatch, lambda x: x.fully_grown),
+                    self.schedule.get_breed_count(Wolf),
+                    self.schedule.get_breed_count(Sheep),
                 ]
             )
 
     def run_model(self, step_count=200):
 
         if self.verbose:
-            print("Initial number wolves: ", self.schedule.get_type_count(Wolf))
-            print("Initial number sheep: ", self.schedule.get_type_count(Sheep))
-            print(
-                "Initial number grass: ",
-                self.schedule.get_type_count(GrassPatch, lambda x: x.fully_grown),
-            )
+            print("Initial number wolves: ", self.schedule.get_breed_count(Wolf))
+            print("Initial number sheep: ", self.schedule.get_breed_count(Sheep))
 
         for i in range(step_count):
             self.step()
 
         if self.verbose:
             print("")
-            print("Final number wolves: ", self.schedule.get_type_count(Wolf))
-            print("Final number sheep: ", self.schedule.get_type_count(Sheep))
-            print(
-                "Final number grass: ",
-                self.schedule.get_type_count(GrassPatch, lambda x: x.fully_grown),
-            )
+            print("Final number wolves: ", self.schedule.get_breed_count(Wolf))
+            print("Final number sheep: ", self.schedule.get_breed_count(Sheep))

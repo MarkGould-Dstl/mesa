@@ -11,17 +11,17 @@ class ForestFire(Model):
     Simple Forest Fire model.
     """
 
-    def __init__(self, width=100, height=100, density=0.65):
+    def __init__(self, height=100, width=100, density=0.65):
         """
         Create a new forest fire model.
 
         Args:
-            width, height: The size of the grid to model
+            height, width: The size of the grid to model
             density: What fraction of grid cells have a tree in them.
         """
         # Set up model objects
         self.schedule = RandomActivation(self)
-        self.grid = Grid(width, height, torus=False)
+        self.grid = Grid(height, width, torus=False)
 
         self.datacollector = DataCollector(
             {
@@ -39,7 +39,7 @@ class ForestFire(Model):
                 # Set all trees in the first column on fire.
                 if x == 0:
                     new_tree.condition = "On Fire"
-                self.grid.place_agent(new_tree, (x, y))
+                self.grid._place_agent((x, y), new_tree)
                 self.schedule.add(new_tree)
 
         self.running = True

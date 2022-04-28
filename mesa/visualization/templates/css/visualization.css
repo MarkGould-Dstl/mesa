@@ -2,8 +2,7 @@
     margin-bottom: 15px;
 }
 
-/* This is specific to the Network visualization */
-div.d3tooltip {
+div.tooltip {
     position: absolute;
     text-align: center;
     padding: 1px;

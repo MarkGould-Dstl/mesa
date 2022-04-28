@@ -12,9 +12,9 @@ Northwestern University, Evanston, IL.
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
-from mesa.time import RandomActivationByType
 
 from .agents import SsAgent, Sugar
+from .schedule import RandomActivationByBreed
 
 
 class SugarscapeCg(Model):
@@ -24,7 +24,7 @@ class SugarscapeCg(Model):
 
     verbose = True  # Print-monitoring
 
-    def __init__(self, width=50, height=50, initial_population=100):
+    def __init__(self, height=50, width=50, initial_population=100):
         """
         Create a new Constant Growback model with the given parameters.
 
@@ -33,14 +33,14 @@ class SugarscapeCg(Model):
         """
 
         # Set parameters
-        self.width = width
         self.height = height
+        self.width = width
         self.initial_population = initial_population
 
-        self.schedule = RandomActivationByType(self)
-        self.grid = MultiGrid(self.width, self.height, torus=False)
+        self.schedule = RandomActivationByBreed(self)
+        self.grid = MultiGrid(self.height, self.width, torus=False)
         self.datacollector = DataCollector(
-            {"SsAgent": lambda m: m.schedule.get_type_count(SsAgent)}
+            {"SsAgent": lambda m: m.schedule.get_breed_count(SsAgent)}
         )
 
         # Create sugar
@@ -72,14 +72,14 @@ class SugarscapeCg(Model):
         # collect data
         self.datacollector.collect(self)
         if self.verbose:
-            print([self.schedule.time, self.schedule.get_type_count(SsAgent)])
+            print([self.schedule.time, self.schedule.get_breed_count(SsAgent)])
 
     def run_model(self, step_count=200):
 
         if self.verbose:
             print(
                 "Initial number Sugarscape Agent: ",
-                self.schedule.get_type_count(SsAgent),
+                self.schedule.get_breed_count(SsAgent),
             )
 
         for i in range(step_count):
@@ -89,5 +89,5 @@ class SugarscapeCg(Model):
             print("")
             print(
                 "Final number Sugarscape Agent: ",
-                self.schedule.get_type_count(SsAgent),
+                self.schedule.get_breed_count(SsAgent),
             )

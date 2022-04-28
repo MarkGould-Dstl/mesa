@@ -420,10 +420,10 @@ inherit from, and create the new visualization class.
 
 .. code:: python
 
-        from mesa.visualization.ModularVisualization import VisualizationElement, CHART_JS_FILE
+        from mesa.visualization.ModularVisualization import VisualizationElement
 
         class HistogramModule(VisualizationElement):
-            package_includes = [CHART_JS_FILE]
+            package_includes = ["Chart.min.js"]
             local_includes = ["HistogramModule.js"]
 
             def __init__(self, bins, canvas_height, canvas_width):

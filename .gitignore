@@ -39,7 +39,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.coverage
+.coverage*
 .cache
 nosetests.xml
 coverage.xml
@@ -68,7 +68,6 @@ target/
 .idea/
 
 # VSCode environment files
-.vscode/
 *.code-workspace
 
 # Apple OSX
@@ -79,8 +78,11 @@ target/
 .dmypy.json
 dmypy.json
 
+# Visual studio files
+.vs/
+
+# Background image for visualisation
+mesa/visualization/images
+
 # pythonenv
 pythonenv*/
-
-# JS dependencies
-mesa/visualization/templates/external/

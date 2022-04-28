@@ -18,15 +18,15 @@ The BatchRunner is set up to collect step by step data of the model. It does
 this by collecting the DataCollector object in a model_reporter (i.e. the
 DataCollector is collecting itself every step).
 
-The end result of the batch run will be a CSV file created in the same
-directory from which Python was run. The CSV file will contain the data from
+The end result of the batch run will be a csv file created in the same
+directory from which Python was run. The csv file will contain the data from
 every step of every run.
 """
 
 from bank_reserves.agents import Bank, Person
 import itertools
 from mesa import Model
-from mesa.batchrunner import batch_run
+from mesa.batchrunner import BatchRunner
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation
@@ -148,7 +148,7 @@ class BankReservesModel(Model):
                 "Model Params": track_params,
                 "Run": track_run,
             },
-            agent_reporters={"Wealth": "wealth"},
+            agent_reporters={"Wealth": lambda x: x.wealth},
         )
 
         # create a single bank for the model
@@ -181,37 +181,20 @@ class BankReservesModel(Model):
 
 # parameter lists for each parameter to be tested in batch run
 br_params = {
-    "init_people": [25, 100],
-    "rich_threshold": [5, 10],
-    "reserve_percent": 5,
+    "init_people": [25, 100, 150, 200],
+    "rich_threshold": [5, 10, 15, 20],
+    "reserve_percent": [0, 50, 100],
 }
 
-if __name__ == "__main__":
-    data = batch_run(
-        BankReservesModel,
-        br_params,
-    )
-    br_df = pd.DataFrame(data)
-    br_df.to_csv("BankReservesModel_Data.csv")
+br = BatchRunner(
+    BankReservesModel,
+    br_params,
+    iterations=1,
+    max_steps=1000,
+    model_reporters={"Data Collector": lambda m: m.datacollector},
+)
 
-    # The commented out code below is the equivalent code as above, but done
-    # via the legacy BatchRunner class. This is a good example to look at if
-    # you want to migrate your code to use `batch_run()` from `BatchRunner`.
-    # Things to note:
-    # - You have to set "reserve_percent" in br_params to `[5]`, because the
-    #   legacy BatchRunner doesn't auto-detect that it is single-valued.
-    # - The model reporters need to be explicitly specified in the legacy
-    #   BatchRunner
-    """
-    from mesa.batchrunner import BatchRunnerMP
-    br = BatchRunnerMP(
-        BankReservesModel,
-        nr_processes=2,
-        variable_parameters=br_params,
-        iterations=2,
-        max_steps=1000,
-        model_reporters={"Data Collector": lambda m: m.datacollector},
-    )
+if __name__ == "__main__":
     br.run_all()
     br_df = br.get_model_vars_dataframe()
     br_step_data = pd.DataFrame()
@@ -220,4 +203,3 @@ if __name__ == "__main__":
             i_run_data = br_df["Data Collector"][i].get_model_vars_dataframe()
             br_step_data = br_step_data.append(i_run_data, ignore_index=True)
     br_step_data.to_csv("BankReservesModel_Step_Data.csv")
-    """

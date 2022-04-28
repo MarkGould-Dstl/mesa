@@ -98,14 +98,15 @@ Client -> Server:
 import asyncio
 import os
 import platform
+import sys
+import webbrowser
+
 import tornado.autoreload
+import tornado.escape
+import tornado.gen
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-import tornado.escape
-import tornado.gen
-import webbrowser
-
 from mesa.visualization.UserParam import UserSettableParameter
 
 # Suppress several pylint warnings for this file.
@@ -116,19 +117,16 @@ from mesa.visualization.UserParam import UserSettableParameter
 if platform.system() == "Windows" and platform.python_version_tuple() >= ("3", "7"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-D3_JS_FILE = "external/d3-7.4.3.min.js"
-CHART_JS_FILE = "external/chart-3.6.1.min.js"
-
 
 class VisualizationElement:
     """
     Defines an element of the visualization.
 
     Attributes:
-        package_includes: A list of external JavaScript and CSS files to
-                          include that are part of the Mesa packages.
-        local_includes: A list of JavaScript and CSS files that are local to
-                        the directory that the server is being run in.
+        package_includes: A list of external JavaScript files to include that
+                          are part of the Mesa packages.
+        local_includes: A list of JavaScript files that are local to the
+                        directory that the server is being run in.
         js_code: A JavaScript code string to instantiate the element.
 
     Methods:
@@ -161,6 +159,9 @@ class VisualizationElement:
 # =============================================================================
 # Actual Tornado code starts here:
 
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 class PageHandler(tornado.web.RequestHandler):
     """Handler for the HTML template which holds the visualization."""
@@ -174,10 +175,8 @@ class PageHandler(tornado.web.RequestHandler):
             port=self.application.port,
             model_name=self.application.model_name,
             description=self.application.description,
-            package_js_includes=self.application.package_js_includes,
-            package_css_includes=self.application.package_css_includes,
-            local_js_includes=self.application.local_js_includes,
-            local_css_includes=self.application.local_css_includes,
+            package_includes=self.application.package_includes,
+            local_includes=self.application.local_includes,
             scripts=self.application.js_code,
         )
 
@@ -251,8 +250,20 @@ class ModularServer(tornado.web.Application):
         {"path": os.path.dirname(__file__) + "/templates"},
     )
     local_handler = (r"/local/(.*)", tornado.web.StaticFileHandler, {"path": ""})
+    image_handler = (
+        r"/assets/(.*)",
+        tornado.web.StaticFileHandler,
+        {"path": os.path.dirname(__file__) + "/images"},
+    )
+    print(os.path.dirname(__file__))
 
-    handlers = [page_handler, socket_handler, static_handler, local_handler]
+    handlers = [
+        page_handler,
+        socket_handler,
+        static_handler,
+        local_handler,
+        image_handler,
+    ]
 
     settings = {
         "debug": True,
@@ -268,22 +279,14 @@ class ModularServer(tornado.web.Application):
         """Create a new visualization server with the given elements."""
         # Prep visualization elements:
         self.visualization_elements = visualization_elements
-        self.package_js_includes = set()
-        self.package_css_includes = set()
-        self.local_js_includes = set()
-        self.local_css_includes = set()
+        self.package_includes = set()
+        self.local_includes = set()
         self.js_code = []
         for element in self.visualization_elements:
             for include_file in element.package_includes:
-                if self._is_stylesheet(include_file):
-                    self.package_css_includes.add(include_file)
-                else:
-                    self.package_js_includes.add(include_file)
+                self.package_includes.add(include_file)
             for include_file in element.local_includes:
-                if self._is_stylesheet(include_file):
-                    self.local_css_includes.add(include_file)
-                else:
-                    self.local_js_includes.add(include_file)
+                self.local_includes.add(include_file)
             self.js_code.append(element.js_code)
 
         # Initializing the model
@@ -341,14 +344,10 @@ class ModularServer(tornado.web.Application):
         """Run the app."""
         if port is not None:
             self.port = port
-        url = f"http://127.0.0.1:{self.port}"
-        print(f"Interface starting at {url}")
+        url = "http://127.0.0.1:{PORT}".format(PORT=self.port)
+        print("Interface starting at {url}".format(url=url))
         self.listen(self.port)
         if open_browser:
             webbrowser.open(url)
         tornado.autoreload.start()
         tornado.ioloop.IOLoop.current().start()
-
-    @staticmethod
-    def _is_stylesheet(filename):
-        return filename.lower().endswith(".css")

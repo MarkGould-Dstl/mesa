@@ -16,7 +16,7 @@ def network_portrayal(G):
             "color": "#CC0000" if not agents or agents[0].wealth == 0 else "#007959",
             "label": None
             if not agents
-            else f"Agent:{agents[0].unique_id} Wealth:{agents[0].wealth}",
+            else "Agent:{} Wealth:{}".format(agents[0].unique_id, agents[0].wealth),
         }
         for (node_id, agents) in G.nodes.data("agent")
     ]
@@ -29,7 +29,7 @@ def network_portrayal(G):
     return portrayal
 
 
-grid = NetworkModule(network_portrayal, 500, 500)
+grid = NetworkModule(network_portrayal, 500, 500, library="sigma")
 chart = ChartModule(
     [{"Label": "Gini", "Color": "Black"}], data_collector_name="datacollector"
 )

@@ -6,6 +6,8 @@ Module for visualizing model objects in grid cells.
 
 """
 from collections import defaultdict
+
+from mesa.visualization.BackgroundImageMethods import find_background_image_path
 from mesa.visualization.ModularVisualization import VisualizationElement
 
 
@@ -67,6 +69,7 @@ class CanvasGrid(VisualizationElement):
         grid_height,
         canvas_width=500,
         canvas_height=500,
+        canvas_background_file=None,
     ):
         """Instantiate a new CanvasGrid.
 
@@ -76,16 +79,24 @@ class CanvasGrid(VisualizationElement):
             grid_width, grid_height: Size of the grid, in cells.
             canvas_height, canvas_width: Size of the canvas to draw in the
                                          client, in pixels. (default: 500x500)
+            canvas_background_file: Absolute path to a background image file.
 
         """
+        self.canvas_background_path = find_background_image_path(
+            canvas_width, canvas_height, canvas_background_file
+        )
         self.portrayal_method = portrayal_method
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.canvas_width = canvas_width
         self.canvas_height = canvas_height
 
-        new_element = "new CanvasModule({}, {}, {}, {})".format(
-            self.canvas_width, self.canvas_height, self.grid_width, self.grid_height
+        new_element = "new CanvasModule({}, {}, {}, {}, {})".format(
+            self.canvas_width,
+            self.canvas_height,
+            self.grid_width,
+            self.grid_height,
+            "'" + self.canvas_background_path + "'",
         )
 
         self.js_code = "elements.push(" + new_element + ");"

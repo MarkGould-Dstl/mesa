@@ -3,7 +3,8 @@ Test the Grid objects.
 """
 import random
 import unittest
-from mesa.space import Grid, SingleGrid, MultiGrid, HexGrid
+
+from mesa.space import Grid, HexGrid, MultiGrid, SingleGrid
 
 # Initial agent positions for testing
 #
@@ -229,7 +230,6 @@ class TestSingleGrid(unittest.TestCase):
                 a = MockAgent(counter, None)
                 self.agents.append(a)
                 self.grid.place_agent(a, (x, y))
-        self.num_agents = len(self.agents)
 
     def test_enforcement(self):
         """
@@ -239,18 +239,15 @@ class TestSingleGrid(unittest.TestCase):
         assert len(self.grid.empties) == 9
         a = MockAgent(100, None)
         with self.assertRaises(Exception):
-            self.grid._place_agent(a, (0, 1))
+            self.grid._place_agent((0, 1), a)
 
         # Place the agent in an empty cell
         self.grid.position_agent(a)
-        self.num_agents += 1
         # Test whether after placing, the empty cells are reduced by 1
         assert a.pos not in self.grid.empties
         assert len(self.grid.empties) == 8
         for i in range(10):
-            # Since the agents and the grid are not associated with a model, we
-            # must explicitly tell move_to_empty the number of agents.
-            self.grid.move_to_empty(a, num_agents=self.num_agents)
+            self.grid.move_to_empty(a)
         assert len(self.grid.empties) == 8
 
         # Place agents until the grid is full
@@ -258,14 +255,13 @@ class TestSingleGrid(unittest.TestCase):
         for i in range(empty_cells):
             a = MockAgent(101 + i, None)
             self.grid.position_agent(a)
-            self.num_agents += 1
         assert len(self.grid.empties) == 0
 
         a = MockAgent(110, None)
         with self.assertRaises(Exception):
             self.grid.position_agent(a)
         with self.assertRaises(Exception):
-            self.move_to_empty(self.agents[0], num_agents=self.num_agents)
+            self.move_to_empty(self.agents[0])
 
 
 # Number of agents at each position for testing
@@ -339,6 +335,41 @@ class TestMultiGrid(unittest.TestCase):
 
         neighbors = self.grid.get_neighbors((1, 3), moore=False, radius=2)
         assert len(neighbors) == 11
+
+
+class TestMultiGridReproducibility(unittest.TestCase):
+    """
+    Testing reproducibility of the multigrid
+    """
+
+    torus = False
+    n_agents = 10
+
+    def setUp(self):
+        """
+        Create a test non-toroidal grid and populate it with Mock Agents
+        """
+        width = 1
+        height = 1
+        self.grid1 = MultiGrid(width, height, self.torus)
+        self.grid2 = MultiGrid(width, height, self.torus)
+        counter = 0
+        for i in range(self.n_agents):
+            counter += 1
+            # Create and place the mock agent
+            a1 = MockAgent(counter, None)
+            a2 = MockAgent(counter, None)
+            self.grid1.place_agent(a1, (0, 0))
+            self.grid2.place_agent(a2, (0, 0))
+
+    def test_agent_order(self):
+        agentList1 = self.grid1.get_cell_list_contents((0, 0))
+        agentList2 = self.grid2.get_cell_list_contents((0, 0))
+
+        ids1 = list(map(lambda n: n.unique_id, agentList1))
+        ids2 = list(map(lambda n: n.unique_id, agentList2))
+
+        self.assertSequenceEqual(ids1, ids2)
 
 
 class TestHexGrid(unittest.TestCase):

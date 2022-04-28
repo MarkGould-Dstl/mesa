@@ -24,7 +24,7 @@ class SchellingAgent(Agent):
 
     def step(self):
         similar = 0
-        for neighbor in self.model.grid.iter_neighbors(self.pos, True):
+        for neighbor in self.model.grid.neighbor_iter(self.pos):
             if neighbor.type == self.type:
                 similar += 1
 
@@ -40,11 +40,11 @@ class Schelling(Model):
     Model class for the Schelling segregation model.
     """
 
-    def __init__(self, width=20, height=20, density=0.8, minority_pc=0.2, homophily=3):
+    def __init__(self, height=20, width=20, density=0.8, minority_pc=0.2, homophily=3):
         """ """
 
-        self.width = width
         self.height = height
+        self.width = width
         self.density = density
         self.minority_pc = minority_pc
         self.homophily = homophily
